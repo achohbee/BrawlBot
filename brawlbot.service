@@ -1,0 +1,15 @@
+[Unit]
+Description=BrawlBot Discord Bot
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+type=simple
+Restart=always
+RestartSec=1
+User=brawlbot
+ExecStart=pipenv run python main.py
+WorkingDirectory=/home/brawlbot/bot
+
+[Install]
+WantedBy=multi-user.target
