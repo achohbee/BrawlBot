@@ -1,19 +1,18 @@
-"""BrawlBot -- Game Role command"""
+"""BrawlBot game role command (/gr)"""
 
-from logging import info, error, exception
-
-from util import log_success, reply
 import discord
-
 from discord import app_commands
 from discord.app_commands.checks import has_permissions
 from discord.app_commands import command
+
+from util import log_success, reply
 
 def get_gr_name(game):
     """Get a game role name"""
     return f'game:{game.lower()}'
 
 class GameRole(app_commands.Group):
+    """GameRole is a command group for the /gr command"""
     def __init__(self):
         super().__init__(name="gr", description="Manage membership in game roles", guild_only=True)
 

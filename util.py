@@ -1,4 +1,5 @@
-from logging import info, error, exception
+"""BrawlBot common utilities"""
+from logging import info
 
 import discord
 
