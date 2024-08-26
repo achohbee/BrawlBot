@@ -5,7 +5,7 @@ from logging import info, error, exception
 from typing import Final
 
 import discord
-from discord import CategoryChannel
+from discord import CategoryChannel, PermissionOverwrite
 from discord.app_commands import command, guild_only
 from discord.app_commands.checks import has_permissions
 from discord.ext import tasks
@@ -15,7 +15,7 @@ from util import log_success, reply
 # Constants
 MAX_CHANNELS: Final[int] = 10
 CHECK_RATE: Final[timedelta] = timedelta(seconds=60)
-MAX_EMPTY_TIME: Final[timedelta] = timedelta(minutes=10)
+MAX_EMPTY_TIME: Final[timedelta] = timedelta(minutes=5)
 DC_CATEGORY_NAME: Final[str] = "Dynamic channels"
 
 class DynamicChannel():
@@ -143,7 +143,8 @@ class DynamicChannel():
                 return
 
             vc = await category.create_voice_channel(
-                name, reason=f'Created by {ctx.user.name} ({ctx.user.id})')
+                name, reason=f'Created by {ctx.user.name} ({ctx.user.id})',
+                overwrites = [ctx.user, PermissionOverwrite(manage_channels=True)])
 
             if vc is None:
                 # This should never happen
@@ -152,10 +153,6 @@ class DynamicChannel():
 
             await reply(ctx, "Dynamic channel created")
             log_success(ctx)
-            try:
-                await ctx.user.move_to(vc)
-            except: # pylint: disable=bare-except
-                # If it didn't work, just ignore it
-                pass
+
 
         return dc_cmd
