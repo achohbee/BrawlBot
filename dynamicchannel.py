@@ -1,7 +1,7 @@
 """BrawlBot dynamic channel system"""
 
 from datetime import datetime, timedelta
-from logging import error, exception
+from logging import info, error, exception
 from typing import Final
 
 import discord
@@ -28,7 +28,7 @@ class DynamicChannel():
 
     async def check_known_empty_channels(self):
         """Check for empty channels that can be deleted"""
-        for channel_id, first in self.empty_channels.items():
+        for channel_id in list(self.empty_channels.keys()):
             try:
                 vc = await self.client.fetch_channel(channel_id)
             except discord.NotFound:
@@ -42,11 +42,13 @@ class DynamicChannel():
                 self.full_refresh = True
                 continue
 
+            first = self.empty_channels[channel_id]
             if len(vc.members) != 0:
                 # No longer empty
-                del self.empty_channels[id]
+                del self.empty_channels[channel_id]
             elif (datetime.now() - first) >= MAX_EMPTY_TIME:
-                del self.empty_channels[id]
+                info(f"Removing empty channel {vc.name} ({vc.id})")
+                del self.empty_channels[channel_id]
                 # Time to die
                 try:
                     await vc.delete()
@@ -92,6 +94,7 @@ class DynamicChannel():
     @check_channels.before_loop
     async def init_channels(self):
         """Build the map between guilds and the dynamic channels categories"""
+        info("Refreshing Dynamic Channel system")
         self.categories = {}
         old_empty_channels = self.empty_channels
         self.empty_channels = {}
@@ -118,7 +121,7 @@ class DynamicChannel():
 
             guild = ctx.guild
 
-            if guild.id in self.categories:
+            if guild.id not in self.categories:
                 await reply(ctx, "This server does not support dynamic channels.")
                 return
 
@@ -131,7 +134,7 @@ class DynamicChannel():
                 await reply(ctx, "Something went wrong. Please wait a few minutes and try again.")
                 return
 
-            if name in category.voice_channels:
+            if name in {vc.name for vc in category.voice_channels}:
                 await reply(ctx, "A dynamic channel with that name already exists!")
                 return
 
@@ -154,3 +157,5 @@ class DynamicChannel():
             except: # pylint: disable=bare-except
                 # If it didn't work, just ignore it
                 pass
+
+        return dc_cmd
