@@ -18,8 +18,12 @@ class GameRole(app_commands.Group):
 
     @command(name="join", description="Join the specified game role")
     @has_permissions(read_message_history=True)
-    async def gr_join(self, ctx: discord.Interaction,  game: str):
+    async def gr_join(self, ctx: discord.Interaction, game: str):
         """Join a game role"""
+        if ctx.guild is None or not isinstance(ctx.user, discord.Member):
+            await reply(ctx, "This command can only be used from a server.")
+            return
+
         rolename = get_gr_name(game)
         role = discord.utils.get(ctx.guild.roles, name=rolename)
         if role is None:
@@ -37,6 +41,10 @@ class GameRole(app_commands.Group):
     @command(name="leave", description="Leave the specified game role")
     async def gr_leave(self, ctx: discord.Interaction, game: str):
         """Leave a game role"""
+        if ctx.guild is None or not isinstance(ctx.user, discord.Member):
+            await reply(ctx, "This command can only be used from a server.")
+            return
+
         rolename = get_gr_name(game)
         role = discord.utils.get(ctx.guild.roles, name=rolename)
         if role is None:
@@ -54,6 +62,10 @@ class GameRole(app_commands.Group):
     @command(name="list", description="List available game roles")
     async def gr_list(self, ctx: discord.Interaction):
         """List available game roles"""
+        if ctx.guild is None or not isinstance(ctx.user, discord.Member):
+            await reply(ctx, "This command can only be used from a server.")
+            return
+
         roles = sorted([r.name[5:] for r in ctx.guild.roles if r.name.startswith("game:")])
         player_roles = {r.name[5:] for r in ctx.user.roles if r.name.startswith("game:")}
         fmt_roles = [f'**{r}**' if r in player_roles else r for r in roles]
@@ -62,8 +74,12 @@ class GameRole(app_commands.Group):
 
     @command(name="create", description="Create a new game role")
     @has_permissions(manage_channels=True)
-    async def gr_create(self, ctx: discord.Interaction,  game: str):
+    async def gr_create(self, ctx: discord.Interaction, game: str):
         """Create a game role"""
+        if ctx.guild is None or not isinstance(ctx.user, discord.Member):
+            await reply(ctx, "This command can only be used from a server.")
+            return
+
         rolename = get_gr_name(game)
         role = discord.utils.get(ctx.guild.roles, name=rolename)
         if role is not None:
@@ -77,8 +93,12 @@ class GameRole(app_commands.Group):
 
     @command(name="delete", description="Remove an existing game role")
     @has_permissions(manage_channels=True)
-    async def gr_delete(self, ctx: discord.Interaction,  game: str):
+    async def gr_delete(self, ctx: discord.Interaction, game: str):
         """Delete a game role"""
+        if ctx.guild is None or not isinstance(ctx.user, discord.Member):
+            await reply(ctx, "This command can only be used from a server.")
+            return
+
         rolename = get_gr_name(game)
         role = discord.utils.get(ctx.guild.roles, name=rolename)
         if role is None:

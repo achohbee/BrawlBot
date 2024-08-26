@@ -1,9 +1,10 @@
 """BrawlBot entry point"""
 
 import logging
-from logging import handlers
+from logging import handlers, error
 import os
 import time
+import sys
 
 from dotenv import load_dotenv
 
@@ -23,6 +24,9 @@ logger.setLevel(logging.INFO)
 # Load token
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
+if TOKEN is None:
+    error("Cannot run without a token")
+    sys.exit(-1)
 
 # Run client
 client = BrawlBotClient()
