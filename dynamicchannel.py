@@ -5,7 +5,7 @@ from logging import info, error, exception
 from typing import Final
 
 import discord
-from discord import CategoryChannel, PermissionOverwrite
+from discord import CategoryChannel
 from discord.app_commands import command, guild_only
 from discord.app_commands.checks import has_permissions
 from discord.ext import tasks
@@ -143,8 +143,9 @@ class DynamicChannel():
                 return
 
             vc = await category.create_voice_channel(
-                name, reason=f'Created by {ctx.user.name} ({ctx.user.id})',
-                overwrites = [ctx.user, PermissionOverwrite(manage_channels=True)])
+                name, reason=f'Created by {ctx.user.name} ({ctx.user.id})')
+
+            await vc.set_permissions(ctx.user, manage_channels=True)
 
             if vc is None:
                 # This should never happen
