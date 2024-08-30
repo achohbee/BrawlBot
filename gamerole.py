@@ -2,7 +2,7 @@
 
 import discord
 from discord import app_commands
-from discord.app_commands.checks import has_permissions
+from discord.app_commands.checks import has_role, has_any_role
 from discord.app_commands import command
 
 from util import log_success, reply
@@ -17,7 +17,7 @@ class GameRole(app_commands.Group):
         super().__init__(name="gr", description="Manage membership in game roles", guild_only=True)
 
     @command(name="join", description="Join the specified game role")
-    @has_permissions(read_message_history=True)
+    @has_role("Regular")
     async def gr_join(self, ctx: discord.Interaction, game: str):
         """Join a game role"""
         if ctx.guild is None or not isinstance(ctx.user, discord.Member):
@@ -39,6 +39,7 @@ class GameRole(app_commands.Group):
         log_success(ctx)
 
     @command(name="leave", description="Leave the specified game role")
+    @has_role("Regular")
     async def gr_leave(self, ctx: discord.Interaction, game: str):
         """Leave a game role"""
         if ctx.guild is None or not isinstance(ctx.user, discord.Member):
@@ -60,6 +61,7 @@ class GameRole(app_commands.Group):
         log_success(ctx)
 
     @command(name="list", description="List available game roles")
+    @has_role("Regular")
     async def gr_list(self, ctx: discord.Interaction):
         """List available game roles"""
         if ctx.guild is None or not isinstance(ctx.user, discord.Member):
@@ -73,7 +75,7 @@ class GameRole(app_commands.Group):
         await reply(ctx, f'**Available roles:**\n{roles_str}')
 
     @command(name="create", description="Create a new game role")
-    @has_permissions(manage_channels=True)
+    @has_any_role("Moderator", "Admin")
     async def gr_create(self, ctx: discord.Interaction, game: str):
         """Create a game role"""
         if ctx.guild is None or not isinstance(ctx.user, discord.Member):
@@ -92,7 +94,7 @@ class GameRole(app_commands.Group):
         log_success(ctx)
 
     @command(name="delete", description="Remove an existing game role")
-    @has_permissions(manage_channels=True)
+    @has_any_role("Moderator", "Admin")
     async def gr_delete(self, ctx: discord.Interaction, game: str):
         """Delete a game role"""
         if ctx.guild is None or not isinstance(ctx.user, discord.Member):

@@ -7,7 +7,7 @@ from typing import Final
 import discord
 from discord import CategoryChannel
 from discord.app_commands import command, guild_only
-from discord.app_commands.checks import has_permissions
+from discord.app_commands.checks import has_role
 from discord.ext import tasks
 
 from util import log_success, reply
@@ -25,6 +25,54 @@ class DynamicChannel():
         self.full_refresh = False
         self.categories: dict[int, int] = {}
         self.empty_channels: dict[int, timedelta] = {}
+
+        # Set up dc_cmd
+        @command(name="dc", description="Create a dynamic channel")
+        @guild_only
+        @has_role("Regular")
+        async def dc_cmd(ctx: discord.Interaction, name: str):
+            """BrawlBot dynamic channel command (/dc)"""
+            if ctx.guild is None or not isinstance(ctx.user, discord.Member):
+                await reply(ctx, "This command can only be used from a server.")
+                return
+
+            guild = ctx.guild
+
+            if guild.id not in self.categories:
+                await reply(ctx, "This server does not support dynamic channels.")
+                return
+
+            channel_id = self.categories[ctx.guild.id]
+            category = await guild.fetch_channel(channel_id)
+
+            if category is None or not isinstance(category, discord.CategoryChannel):
+                self.full_refresh = True
+                error(f"Server {guild.name} ({guild.id}) lost category channel {channel_id}")
+                await reply(ctx, "Something went wrong. Please wait a few minutes and try again.")
+                return
+
+            if name in {vc.name for vc in category.voice_channels}:
+                await reply(ctx, "A dynamic channel with that name already exists!")
+                return
+
+            if len(category.voice_channels) >= MAX_CHANNELS:
+                await reply(ctx, "There are too many dynamic channels already!")
+                return
+
+            vc = await category.create_voice_channel(
+                name, reason=f'Created by {ctx.user.name} ({ctx.user.id})')
+
+            await vc.set_permissions(ctx.user, manage_channels=True)
+
+            if vc is None:
+                # This should never happen
+                await reply(ctx, "Failed to create the new channel.")
+                return
+
+            await reply(ctx, "Dynamic channel created")
+            log_success(ctx)
+
+        self.dc_cmd : discord.app_commands.Command = dc_cmd
 
     async def check_known_empty_channels(self):
         """Check for empty channels that can be deleted"""
@@ -107,53 +155,3 @@ class DynamicChannel():
                             self.empty_channels[vc.id] = old_empty_channels[vc.id] \
                                 if vc.id in old_empty_channels else datetime.now()
                     break
-
-    def generate_command(self):
-        """Generator for Brawlbot /dc command"""
-        @command(name="dc", description="Create a dynamic channel")
-        @guild_only
-        @has_permissions(read_message_history=True)
-        async def dc_cmd(ctx: discord.Interaction, name: str):
-            """BrawlBot dynamic channel command (/dc)"""
-            if ctx.guild is None or not isinstance(ctx.user, discord.Member):
-                await reply(ctx, "This command can only be used from a server.")
-                return
-
-            guild = ctx.guild
-
-            if guild.id not in self.categories:
-                await reply(ctx, "This server does not support dynamic channels.")
-                return
-
-            channel_id = self.categories[ctx.guild.id]
-            category = await guild.fetch_channel(channel_id)
-
-            if category is None or not isinstance(category, discord.CategoryChannel):
-                self.full_refresh = True
-                error(f"Server {guild.name} ({guild.id}) lost category channel {channel_id}")
-                await reply(ctx, "Something went wrong. Please wait a few minutes and try again.")
-                return
-
-            if name in {vc.name for vc in category.voice_channels}:
-                await reply(ctx, "A dynamic channel with that name already exists!")
-                return
-
-            if len(category.voice_channels) >= MAX_CHANNELS:
-                await reply(ctx, "There are too many dynamic channels already!")
-                return
-
-            vc = await category.create_voice_channel(
-                name, reason=f'Created by {ctx.user.name} ({ctx.user.id})')
-
-            await vc.set_permissions(ctx.user, manage_channels=True)
-
-            if vc is None:
-                # This should never happen
-                await reply(ctx, "Failed to create the new channel.")
-                return
-
-            await reply(ctx, "Dynamic channel created")
-            log_success(ctx)
-
-
-        return dc_cmd

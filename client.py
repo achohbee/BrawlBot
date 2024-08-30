@@ -2,10 +2,11 @@
 
 import discord
 
-from dynamicchannel import DynamicChannel
+from dynamic_channel import DynamicChannel
 from gamerole import GameRole
 from tree import BrawlBotCommandTree
 from util import info
+from vouch import vouch_cmd
 
 class BrawlBotClient(discord.Client):
     """BrawlBotClient is an implementation of Client for BrawlBot interactions"""
@@ -18,8 +19,8 @@ class BrawlBotClient(discord.Client):
         self.gr = GameRole()
 
         self.tree.add_command(self.gr)
-        self.tree.add_command(self.dc.generate_command())
-
+        self.tree.add_command(self.dc.dc_cmd)
+        self.tree.add_command(vouch_cmd)
 
     async def on_ready(self):
         """Register comamnds"""
@@ -28,3 +29,9 @@ class BrawlBotClient(discord.Client):
         info("Initializing Dynamic Channel check loop")
         self.dc.check_channels.start()
         info("Ready to handle requests")
+
+    async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
+        """Add 'view channel' permission to @everyone on newly creating Gaming voice channels"""
+        if isinstance(channel, discord.VoiceChannel) and channel.category is not None \
+                and channel.category.name == 'Gaming':
+            await channel.set_permissions(channel.guild.default_role, view_channel = True)
