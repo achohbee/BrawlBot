@@ -35,11 +35,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="client.py" />
-    <Compile Include="dynamicchannel.py" />
+    <Compile Include="dynamic_channel.py" />
     <Compile Include="tree.py" />
     <Compile Include="gamerole.py" />
     <Compile Include="main.py" />
     <Compile Include="util.py" />
+    <Compile Include="vouch.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
