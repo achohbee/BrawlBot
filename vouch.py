@@ -26,5 +26,5 @@ async def vouch_cmd(ctx: Interaction, member: Member):
 
     await member.add_roles(role,  reason = f"Vouched for by {ctx.user.name} ({ctx.user.id})")
 
-    await reply(ctx, f"You have vouched for {member.global_name}!")
+    await reply(ctx, f"You have vouched for {member.name}!")
     log_success(ctx)
