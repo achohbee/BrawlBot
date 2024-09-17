@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="client.py" />
     <Compile Include="dynamic_channel.py" />
+    <Compile Include="game_control.py" />
     <Compile Include="tree.py" />
     <Compile Include="gamerole.py" />
     <Compile Include="main.py" />
