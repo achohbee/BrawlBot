@@ -4,6 +4,7 @@ import discord
 
 from dynamic_channel import DynamicChannel
 from gamerole import GameRole
+from game_control import gamectl
 from tree import BrawlBotCommandTree
 from util import info
 from vouch import vouch_cmd
@@ -21,6 +22,7 @@ class BrawlBotClient(discord.Client):
         self.tree.add_command(self.gr)
         self.tree.add_command(self.dc.dc_cmd)
         self.tree.add_command(vouch_cmd)
+        self.tree.add_command(gamectl)
 
     async def on_ready(self):
         """Register comamnds"""
